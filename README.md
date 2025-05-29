@@ -1,23 +1,23 @@
 # File Watcher Mover
 
-Este projeto monitora um ou mais diretórios e move automaticamente arquivos recém-criados ou renomeados para outros diretórios, de acordo com sua extensão. Ideal para organizar downloads, imagens, vídeos e outros tipos de arquivos de forma automática.
+This project monitors one or more directories and automatically moves newly created or renamed files to other directories based on their extensions. Ideal for organizing downloads, images, videos, and other types of files automatically.
 
-## Funcionalidades
+## Features
 
-- Monitora múltiplos diretórios simultaneamente.
-- Move arquivos para pastas de destino configuradas conforme a extensão.
-- Suporte a extensões personalizadas via arquivo de configuração.
-- Compatível com Windows, Linux e macOS.
+- Monitors multiple directories simultaneously.
+- Moves files to target folders based on their extension.
+- Supports custom extensions via configuration file.
+- Compatible with Windows, Linux, and macOS.
 
-## Como funciona
+## How It Works
 
-O sistema utiliza a biblioteca [watchdog](https://pypi.org/project/watchdog/) para observar eventos de criação e movimentação de arquivos. Ao detectar um novo arquivo ou uma mudança de extensão (Ex: o arquivo é criado como '.tmp' e é renomeado para '.mp4'), ele verifica a configuração e move o arquivo para o diretório correspondente.
+The system uses the [watchdog](https://pypi.org/project/watchdog/) library to observe file creation and movement events. When it detects a new file or a change in extension (e.g., a file is created as '.tmp' and renamed to '.mp4'), it checks the configuration and moves the file to the corresponding directory.
 
-## Configuração
+## Configuration
 
-Não há limitações, configure a extensão de arquivo que você quiser e quantos diretórios alvo quiser.
+There are no limitations — configure any file extension and as many target directories as you want.
 
-Edite o arquivo `config.json` para definir os diretórios monitorados e os destinos para cada extensão:
+Edit the `config.json` file to define the monitored directories and the destinations for each extension:
 
 ```json
 {
@@ -33,47 +33,47 @@ Edite o arquivo `config.json` para definir os diretórios monitorados e os desti
 }
 ```
 
-- **targets**: Lista de diretórios a serem monitorados.
-- **extensions**: Mapeamento de extensões para diretórios de destino.
+- **targets**: List of directories to be monitored.
+- **extensions**: Mapping of extensions to destination directories.
 
 <details>
-  <summary><h2>Como rodar</h2></summary>
+  <summary><h2>How to Run</h2></summary>
 
-### Instalação
+### Installation
 
-1. **Clone o repositório:**
+1. **Clone the repository:**
    ```sh
-   git clone https://github.com/seu-usuario/file-mover.git
+   git clone https://github.com/your-username/file-mover.git
    cd file-mover
    ```
 
-2. **Crie e ative um ambiente virtual (opcional, mas recomendado):**
+2. **Create and activate a virtual environment (optional but recommended):**
    ```sh
    python -m venv venv
-   venv\Scripts\activate   # No Windows
-   source venv/bin/activate  # No Linux/macOS
+   venv\Scripts\activate   # On Windows
+   source venv/bin/activate  # On Linux/macOS
    ```
 
-3. **Instale as dependências:**
+3. **Install the dependencies:**
    ```sh
    pip install -r requirements.txt
    ```
 
-### Uso
+### Usage
 
-Execute o script principal:
+Run the main script:
 
 ```sh
 python main.py
 ```
 
-O programa ficará em execução, monitorando os diretórios definidos. Para interromper, pressione `Ctrl+C`.
+The program will stay running, monitoring the defined directories. To stop it, press `Ctrl+C`.
 </details>
 
-## Licença
+## License
 
-Este projeto está licenciado sob a licença MIT.
+This project is licensed under the MIT License.
 
 ---
 
-Sinta-se à vontade para contribuir ou sugerir melhorias!
+Feel free to contribute or suggest improvements!
