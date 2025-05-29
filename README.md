@@ -43,7 +43,7 @@ Edit the `config.json` file to define the monitored directories and the destinat
 
 1. **Clone the repository:**
    ```sh
-   git clone https://github.com/your-username/file-mover.git
+   git clone https://github.com/mtpontes/file-watcher-mover.git
    cd file-mover
    ```
 
