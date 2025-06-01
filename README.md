@@ -22,13 +22,13 @@ Edit the `config.json` file to define the monitored directories and the destinat
 ```json
 {
   "targets": [
-    "./dir-teste",
-    "./outros-arquivos"
+    "C:\\Users\\your_user\\Downloads",
   ],
   "extensions": {
-    ".txt":   "./textos",
-    ".jpg":   "./imagens/jpg",
-    ".mp4":   "./videos/mp4"
+    ".txt":   "./doc/txt",
+    ".pdf":   "./doc/pdf",
+    ".jpg":   "./image/jpg",
+    ".mp4":   "./video/mp4"
   }
 }
 ```
@@ -69,11 +69,3 @@ python main.py
 
 The program will stay running, monitoring the defined directories. To stop it, press `Ctrl+C`.
 </details>
-
-## License
-
-This project is licensed under the MIT License.
-
----
-
-Feel free to contribute or suggest improvements!
