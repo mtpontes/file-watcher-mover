@@ -22,13 +22,21 @@ Edit the `config.json` file to define the monitored directories and the destinat
 ```json
 {
   "targets": [
-    "C:\\Users\\your_user\\Downloads",
+    "C:\\Users\\your_user\\Downloads"
   ],
-  "extensions": {
-    ".txt":   "./doc/txt",
-    ".pdf":   "./doc/pdf",
-    ".jpg":   "./image/jpg",
-    ".mp4":   "./video/mp4"
+  "extension": {
+    ".pdf":   "C:\\Users\\your_user\\Documents\\pdf",
+    ".doc":   "C:\\Users\\your_user\\Documents\\doc",
+    ".docx":  "C:\\Users\\your_user\\Documents\\doc",
+    ".zip":   "C:\\Users\\your_user\\Documents\\zip",
+    ".rar":   "C:\\Users\\your_user\\Documents\\zip",
+    ".jpg":   "C:\\Users\\your_user\\Images\\jpg",
+    ".jpeg":  "C:\\Users\\your_user\\Images\\jpg",
+    ".png":   "C:\\Users\\your_user\\Images\\png",
+    ".gif":   "C:\\Users\\your_user\\Images\\gif",
+    ".webp":  "C:\\Users\\your_user\\Videos\\webp",
+    ".webm":  "C:\\Users\\your_user\\Videos\\webm",
+    ".mp4":   "C:\\Users\\your_user\\Videos\\mp4",
   }
 }
 ```
