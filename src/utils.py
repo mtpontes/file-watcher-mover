@@ -1,22 +1,13 @@
 import json
 
 
+import json
+
+
 def get_path_str(path: str | bytes) -> str:
     if isinstance(path, bytes):
         return path.decode('utf-8', errors='replace')
     return path
-
-def get_targets(configs: dict) -> list[str]:
-    targets: list[str] = configs.get("targets")
-    if not targets:
-        raise ValueError("TARGETS environment variable is not set or empty.")
-    return targets
-
-def get_extensions_map(configs: dict) -> dict:
-    extension_map: dict = configs.get("extension")
-    if not extension_map:
-        raise ValueError("TARGETS environment variable is not set or empty.")
-    return extension_map
 
 def display_start_message(extension_to_dir_map: dict):
     print("=" * 50)

@@ -21,7 +21,8 @@ class FileService:
             dest_extension: str = os.path.splitext(dest_path)[1].lower()
             print(f'{self.__class__.__name__} - handle_moved - Extensions - src: {src_extension}, dest: {dest_extension}')
             
-            if src_extension == '.tmp' and dest_extension in self.extension_to_dir.keys():
+            download_in_progress_extensions: list[str] = ['.tmp', '.crdownload', '.part', '.download']
+            if (src_extension in download_in_progress_extensions) and dest_extension in self.extension_to_dir.keys():
                 print(f'{self.__class__.__name__} - handle_moved - Tratando arquivo: {src_path}')
                 dest_final: str = self.extension_to_dir.get(dest_extension.lower())
                 self._move_file(dest_path, dest_final)
@@ -51,14 +52,10 @@ class FileService:
             print(f'{self.__class__.__name__} - handle_created - Error moving file: {e}')
 
     def _move_file(self, src_path: str, destiny: str) -> None:
+        print(f'{self.__class__.__name__} - _move_file - Input - src_path: {src_path}, destiny: {destiny}')
         try:
-            print(f'{self.__class__.__name__} - _move_file - Input - src_path: {src_path}, destiny: {destiny}')
-            
             result_file_path: str = os.path.join(destiny, os.path.basename(src_path))
-            print(f'{self.__class__.__name__} - _move_file - result_file_path-1: {result_file_path}')
-            
             result_file_path: str = os.path.abspath(result_file_path)
-            print(f'{self.__class__.__name__} - _move_file - result_file_path-2: {result_file_path}')
             
             if os.path.exists(result_file_path):
                 print(f'{self.__class__.__name__} - _move_file - Removing existing file: {result_file_path}')
