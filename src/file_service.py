@@ -42,7 +42,7 @@ class FileService:
             extension: str = os.path.splitext(src_path)[1].lower()
             dest_path: str = self.extension_to_dir.get(extension.lower())
             if not dest_path:
-                print(f'{self.__class__.__name__} - handle_created - Formato não suportado: {src_path}')
+                print(f'{self.__class__.__name__} - handle_created - Format not supported: {src_path}')
                 return
             
             self._move_file(src_path, dest_path)
