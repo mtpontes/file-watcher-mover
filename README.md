@@ -2,6 +2,8 @@
 
 This project monitors one or more directories and automatically moves newly created or renamed files to other directories based on their extensions. Ideal for organizing downloads, images, videos, and other types of files automatically.
 
+![Application Flow example](./assets/app-flow-example.png)
+
 ## Features
 
 - Monitors multiple directories simultaneously.
@@ -82,35 +84,50 @@ The program will stay running, monitoring the defined directories. To stop it, p
 <details>
   <summary><h2>Windows Service</h2></summary>
 
+This is the approach I recommend the most, I created this app precisely with the intention of using it as a Windows service.
+
 <!-- ### Build
 #### Prerequisites
 - Pyinstaller
 
-```bash
+```sh
 pyinstaller --onefile main.py
 ``` -->
 
 <!-- **Build together with the configuration file:**
-```bash
+```sh
 pyinstaller --onefile --add-data "config.json;." main.py
 ``` -->
 
-#### Prerequisites
+### Resource allocation
+The process consumes only 1.5MB of RAM, CPU consumption is also irrelevant, while no event is triggered, the CPU remains at 0% usage, when an event is triggered it does not even reach 1% (Ryzen 7 5800X) usage, in addition to the processing occurring fast enough that you don't even notice it happened.
+![Windows Task Manager process print](./assets/process.png)
+
+### Prerequisites
 - NSSM CLI
 
-#### Turning into a service
-```bash
-nssm install <service_name> "C:\example\absolute\path\main.exe"
+### Turning into a service
+```sh
+nssm install <service_name> "C:\example\absolute\path\file-watcher-mover.exe"
 ```
 
-#### Start
-```bash
+#### Start service
+You can either use an NSSM command, or do this manually via the native Windows CLI or via the Services interface.
+
+Examples:
+```sh
+# Native
+net start <service_name>
+```
+
+```sh
 nssm start <service_name>
 ```
 
+
 The `.exe` is linked to the service; to manage it, you need to stop and remove the service.
 
-> **NOTE:**  
+> **NOTE**  
 > For more information about NSSM commands, troubleshooting with PyInstaller, and other advanced usage, please refer to the official documentation of each tool.
 </details>
 
