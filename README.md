@@ -99,14 +99,18 @@ pyinstaller --onefile main.py
 pyinstaller --onefile --add-data "config.json;." main.py
 ``` -->
 
-### Resource allocation
-The process consumes only 1.5MB of RAM, CPU consumption is also irrelevant, while no event is triggered, the CPU remains at 0% usage, when an event is triggered it does not even reach 1% (Ryzen 7 5800X) usage, in addition to the processing occurring fast enough that you don't even notice it happened.
-![Windows Task Manager process print](./assets/process.png)
-
 ### Prerequisites
 - NSSM CLI
+- The executable of this application, available in the [releases page](https://github.com/mtpontes/file-watcher-mover/releases)
 
-### Turning into a service
+
+
+### Turning into a Windows service
+> **WARNING**\
+> **For this step it is necessary to execute the terminal as administrator.**
+
+> **Before starting this process, download the `file-watcher-mover-win64.zip` file from the releases, unzip the contents and place both the `.exe` and `config.json` files together in a final directory where you want to keep the program. Only then proceed with the installation of the service.**
+
 ```sh
 nssm install <service_name> "C:\example\absolute\path\file-watcher-mover.exe"
 ```
@@ -124,10 +128,33 @@ net start <service_name>
 nssm start <service_name>
 ```
 
-
 The `.exe` is linked to the service; to manage it, you need to stop and remove the service.
 
+#### Stop service
+To stop the service from running, use one of the commands below. This will stop the program, but it does not remove it from the system — it can be started again at any time.
+
+Examples:
+```sh
+# Native
+net stop <service_name>
+```
+```sh
+nssm stop <service_name>
+```
+
+#### Remove service
+To completely remove the Windows service, use the command below. After executing this command, the service will no longer exist on the system and will no longer be able to be started until it is reinstalled.
+
+```sh
+nssm remove <service_name>
+```
+
+
+### Resource allocation
+The process consumes only 1.5MB of RAM, CPU consumption is also irrelevant, while no event is triggered, the CPU remains at 0% usage, when an event is triggered it does not even reach 1% (Ryzen 7 5800X) usage, in addition to the processing occurring fast enough that you don't even notice it happened.
+![Windows Task Manager process print](./assets/process.png)
+
 > **NOTE**  
-> For more information about NSSM commands, troubleshooting with PyInstaller, and other advanced usage, please refer to the official documentation of each tool.
+> For more information about NSSM commands, please refer to the official documentation.
 </details>
 
