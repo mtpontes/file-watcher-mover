@@ -1,7 +1,8 @@
 import time
 
-from src.file_service import FileService
 from watchdog.events import (FileSystemEventHandler, DirCreatedEvent, FileCreatedEvent, DirMovedEvent, FileMovedEvent)
+
+from src.file_service import FileService
 
 
 class DirHandler(FileSystemEventHandler):
