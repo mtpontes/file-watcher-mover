@@ -13,7 +13,8 @@ This project monitors one or more directories and automatically moves newly crea
 
 ## How It Works
 
-The system uses the [watchdog](https://pypi.org/project/watchdog/) library to observe file creation and movement events. When it detects a new file or a change in extension (e.g., a file is created as '.tmp' and renamed to '.mp4'), it checks the configuration and moves the file to the corresponding directory.
+The system uses the [watchdog](https://pypi.org/project/watchdog/) library to observe file creation and movement events. When it detects a new file or a change in extension (e.g., a file is created as '.tmp' and renamed to '.mp4'), it checks the configuration and moves the file to the corresponding directory. This app also has unique execution functionality, when using the argument `--once` it performs only once and then closes.
+
 
 ## Configuration
 > [!IMPORTANT]\
