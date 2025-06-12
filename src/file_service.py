@@ -25,7 +25,7 @@ class FileService:
             if (src_extension in download_in_progress_extensions) and dest_extension in self.extension_to_dir.keys():
                 print(f'{self.__class__.__name__} - handle_moved - Tratando arquivo: {src_path}')
                 dest_final: str = self.extension_to_dir.get(dest_extension.lower())
-                self._move_file(dest_path, dest_final)
+                self.move_file(dest_path, dest_final)
             
             print(f'{self.__class__.__name__} - handle_moved - Output')
         except Exception as e:
@@ -45,13 +45,13 @@ class FileService:
                 print(f'{self.__class__.__name__} - handle_created - Format not supported: {src_path}')
                 return
             
-            self._move_file(src_path, dest_path)
+            self.move_file(src_path, dest_path)
             
             print(f'{self.__class__.__name__} - handle_created - Output')
         except Exception as e:
             print(f'{self.__class__.__name__} - handle_created - Error moving file: {e}')
 
-    def _move_file(self, src_path: str, destiny: str) -> None:
+    def move_file(self, src_path: str, destiny: str) -> None:
         print(f'{self.__class__.__name__} - _move_file - Input - src_path: {src_path}, destiny: {destiny}')
         try:
             base_name = os.path.basename(src_path)
