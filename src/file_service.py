@@ -54,18 +54,20 @@ class FileService:
     def _move_file(self, src_path: str, destiny: str) -> None:
         print(f'{self.__class__.__name__} - _move_file - Input - src_path: {src_path}, destiny: {destiny}')
         try:
-            result_file_path: str = os.path.join(destiny, os.path.basename(src_path))
-            result_file_path: str = os.path.abspath(result_file_path)
-            
-            if os.path.exists(result_file_path):
-                print(f'{self.__class__.__name__} - _move_file - Removing existing file: {result_file_path}')
-                os.remove(result_file_path)
-                
-            file_abs_path = os.path.abspath(src_path)
-            destiny_abs_path = os.path.abspath(destiny)
+            base_name = os.path.basename(src_path)
+            name, ext = os.path.splitext(base_name)
+            result_file_path = os.path.join(destiny, base_name)
+            result_file_path = os.path.abspath(result_file_path)
 
+            counter = 1
+            while os.path.exists(result_file_path):
+                result_file_path = os.path.join(destiny, f"{name} ({counter}){ext}")
+                result_file_path = os.path.abspath(result_file_path)
+                counter += 1
+
+            file_abs_path = os.path.abspath(src_path)
             os.makedirs(destiny, exist_ok=True)
-            shutil.move(file_abs_path, destiny_abs_path)
+            shutil.move(file_abs_path, result_file_path)
             print(f'{self.__class__.__name__} - _move_file - Output')
         except Exception as e:
             print(f'Exception: {e}, type: {{type(e)}}')
