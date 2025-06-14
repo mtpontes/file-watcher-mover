@@ -1,7 +1,7 @@
 name: File Watcher Mover
 
 on:
-  pull_request:
+  push:
     branches: [ "main" ]
 
 jobs:
@@ -9,27 +9,61 @@ jobs:
   check-branch:
     runs-on: ubuntu-latest
     outputs:
-      is-release: ${{ steps.check.outputs.is-release }}
+      is-merge-from-release: ${{ steps.check.outputs.is-merge-from-release }}
+      release-version: ${{ steps.check.outputs.release-version }}
     steps:
       - name: Check if branch is release
         id: check
         run: |
-          if [[ "${{ github.head_ref }}" == release* ]]; then
-            echo "IF CHECK - Branch is a release branch: ${{ github.head_ref }}"
-            echo "is-release=true" >> $GITHUB_OUTPUT
+          COMMIT_MESSAGE="${{ github.event.head_commit.message }}"
+          echo "Commit message: $COMMIT_MESSAGE"
+          
+          # Converte para minúsculo para comparação case-insensitive
+          COMMIT_MESSAGE_LOWER=$(echo "$COMMIT_MESSAGE" | tr '[:upper:]' '[:lower:]')
+          
+          # Verifica se contém a palavra 'merge'
+          if [[ "$COMMIT_MESSAGE_LOWER" == *"merge"* ]]; then
+            echo "✓ Commit message contains 'merge'"
+            HAS_MERGE=true
           else
-            echo "IF CHECK - Branch is a release branch: ${{ github.head_ref }}"
-            echo "is-release=false" >> $GITHUB_OUTPUT
+            echo "✗ Commit message does not contain 'merge'"
+            HAS_MERGE=false
+          fi
+          
+          # Verifica se contém padrão release/x.x.x usando grep
+          if echo "$COMMIT_MESSAGE" | grep -qE "release/[0-9]+\.[0-9]+\.[0-9]+"; then
+            echo "✓ Commit message contains release version pattern"
+            HAS_RELEASE=true
+            # Extrai a versão usando sed
+            RELEASE_VERSION=$(echo "$COMMIT_MESSAGE" | grep -oE "release/[0-9]+\.[0-9]+\.[0-9]+" | sed 's/release\///')
+            echo "Extracted version: $RELEASE_VERSION"
+          else
+            echo "✗ Commit message does not contain release version pattern"
+            HAS_RELEASE=false
+            RELEASE_VERSION=""
+          fi
+          
+          # Verifica ambas as condições
+          if [[ "$HAS_MERGE" == true && "$HAS_RELEASE" == true ]]; then
+            echo "🎉 Push is a merge from a release branch"
+            echo "is-merge-from-release=true" >> $GITHUB_OUTPUT
+            echo "release-version=$RELEASE_VERSION" >> $GITHUB_OUTPUT
+          else
+            echo "❌ Push is not a merge from a release branch"
+            echo "is-merge-from-release=false" >> $GITHUB_OUTPUT
+            echo "release-version=" >> $GITHUB_OUTPUT
           fi
 
   build:
     needs: check-branch
-    if: needs.check-branch.outputs.is-release == 'true'
+    if: needs.check-branch.outputs.is-merge-from-release == 'true'
     uses: ./.github/workflows/build.yml
     secrets: inherit
 
   publish-release:
     needs: [check-branch, build]
-    if: needs.check-branch.outputs.is-release == 'true'
+    if: needs.check-branch.outputs.is-merge-from-release == 'true'
     uses: ./.github/workflows/publish-release.yml
+    with:
+      release-version: ${{ needs.check-branch.outputs.release-version }}
     secrets: inherit
