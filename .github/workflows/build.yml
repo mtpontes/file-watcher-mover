@@ -1,0 +1,42 @@
+name: Build
+on:
+  workflow_call:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.13
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.13"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pyinstaller
+
+      - name: Build executable with PyInstaller
+        run: |
+          pyinstaller --onefile -n "file-watcher-mover-win64.exe" main.py
+
+      - name: Create package directory
+        run: |
+          mkdir package
+          copy dist\file-watcher-mover-win64.exe package\
+          copy config.json package\
+
+      - name: Create zip file
+        run: |
+          powershell Compress-Archive -Path package\* -DestinationPath file-watcher-mover-win64.zip
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: file-watcher-mover-win64
+          path: file-watcher-mover-win64.zip
+          retention-days: 1
