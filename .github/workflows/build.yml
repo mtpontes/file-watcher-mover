@@ -22,12 +22,12 @@ jobs:
 
       - name: Build executable with PyInstaller
         run: |
-          pyinstaller --onefile -n "file-watcher-mover-win64.exe" main.py
+          pyinstaller --onefile -n "file-watcher-mover.exe" main.py
 
       - name: Create package directory
         run: |
           mkdir package
-          copy dist\file-watcher-mover-win64.exe package\
+          copy dist\file-watcher-mover.exe package\
           copy config.json package\
 
       - name: Create zip file
