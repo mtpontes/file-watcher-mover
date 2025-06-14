@@ -1,0 +1,35 @@
+name: File Watcher Mover
+
+on:
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  # Only execute if the PR comes from a 'release' branch
+  check-branch:
+    runs-on: ubuntu-latest
+    outputs:
+      is-release: ${{ steps.check.outputs.is-release }}
+    steps:
+      - name: Check if branch is release
+        id: check
+        run: |
+          if [[ "${{ github.head_ref }}" == release* ]]; then
+            echo "IF CHECK - Branch is a release branch: ${{ github.head_ref }}"
+            echo "is-release=true" >> $GITHUB_OUTPUT
+          else
+            echo "IF CHECK - Branch is a release branch: ${{ github.head_ref }}"
+            echo "is-release=false" >> $GITHUB_OUTPUT
+          fi
+
+  build:
+    needs: check-branch
+    if: needs.check-branch.outputs.is-release == 'true'
+    uses: ./.github/workflows/build.yml
+    secrets: inherit
+
+  publish-release:
+    needs: [check-branch, build]
+    if: needs.check-branch.outputs.is-release == 'true'
+    uses: ./.github/workflows/publish-release.yml
+    secrets: inherit

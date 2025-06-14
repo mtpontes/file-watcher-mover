@@ -1,0 +1,60 @@
+name: Publish Release
+
+on:
+  workflow_call:
+
+jobs:
+  publish-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: file-watcher-mover-win64
+          path: ./
+
+      - name: Extract version from branch name
+        id: version
+        run: |
+          # Extract version from branch release/x.x.x
+          VERSION="${{ github.head_ref }}"
+          VERSION=$(echo $VERSION | sed 's/release\///')
+          
+          # Validates if it is in the format x.x.x
+          if [[ ! $VERSION =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Error: Branch name should follow pattern release/x.x.x, got: ${{ github.head_ref }}"
+            exit 1
+          fi
+          
+          # Add the 'v' prefix to the tag
+          VERSION="v$VERSION"
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Version extracted: $VERSION"
+
+      - name: Create Release
+        id: create_release
+        uses: softprops/action-gh-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.TOKEN_GITHUB }}
+        with:
+          tag_name: ${{ steps.version.outputs.version }}
+          name: Release ${{ steps.version.outputs.version }}
+          body: |
+            ## Changes
+            
+            Release automatically created from branch `${{ github.head_ref }}`.
+            
+            ### Downloads
+            - **file-watcher-mover-win64.zip**: Executable for Windows 64-bit
+            
+            ### How to use
+            1. Download the `file-watcher-mover-win64.zip` file
+            2. Extract it to a folder of your choice
+            3. Configure the `config.json` file as needed
+            4. Run `file-watcher-mover-win64.exe`
+          draft: false
+          prerelease: false
+          files: ./file-watcher-mover-win64.zip
