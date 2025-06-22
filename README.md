@@ -1,25 +1,26 @@
 # File Watcher Mover
-
-This project monitors one or more directories and automatically moves newly created or renamed files to other directories based on their extensions. Ideal for organizing downloads, images, videos, and other types of files automatically.
+This project monitors one or more directories and automatically moves files newly created or renamed to other directories based on their extensions or a regular expression pattern. Ideal for organizing downloads, images, videos and other file types automatically.
 
 ![Application Flow example](./assets/app-flow-example.png)
 
 ## Features
 
 - Monitors multiple directories simultaneously.
-- Moves files to target folders based on their extension.
-- Supports custom extensions via configuration file.
+- Moves files to target folders based on their extension and regex.
+- Supports custom extensions and regex via configuration file.
 - Compatible with Windows, Linux, and macOS.
 
 ## How It Works
 
-The system uses the [watchdog](https://pypi.org/project/watchdog/) library to observe file creation and movement events. When it detects a new file or a change in extension (e.g., a file is created as '.tmp' and renamed to '.mp4'), it checks the configuration and moves the file to the corresponding directory. This app also has unique execution functionality, when using the argument `--once` it performs only once and then closes.
-
+The system uses the [watchdog](https://pypi.org/project/watchdog/) library to observe file creation and movement events. When it detects a new file or a name change of an existing file (e.g. a file is created as '.tmp' and renamed to '.mp4'), it checks the configuration and moves the file to the corresponding directory. This application also has unique run functionality, when using the `--once` argument, it runs only once and then exits.
 
 ## Configuration
 > [!IMPORTANT]\
 > Always keep the `config.json` file in the same directory as `main.py` or the generated `.exe`.  
-> Make sure the `config.json` is filled with valid directory paths for both the `"targets"` and `"extension"` fields.  
+> Make sure the `config.json` is filled with valid directory paths for both the `"targets"` and `"extension"` fields.
+> The 'extensionConfig' key can be kept as an empty object `{}` if there is no custom configuration for extensions.
+> The 'regexConfig' key can be kept as an empty object `{}` if there is no custom configuration for regex.
+> If a key is specified inside the extensionConfig/regexConfig object, it must be filled with a non-empty string.
 > Example:
 > ```json
 > {
@@ -38,14 +39,12 @@ The system uses the [watchdog](https://pypi.org/project/watchdog/) library to ob
 > }
 > ```
 
-There are no limitations — configure any file extension and as many target directories as you want.
+There are no limitations — configure any file extension/regex and as many target directories as you want.
 
 Edit the `config.json` file to define the monitored directories and the destinations for each extension:
-
-
-
 - **targets**: List of directories to be monitored.
-- **extensions**: Mapping of extensions to destination directories.
+- **extensionToPath**: Mapping of extensions to destination directories.
+- **patternToPath**: Mapping of regex to destination directories.
 
 <details>
   <summary><h2>How to Run</h2></summary>

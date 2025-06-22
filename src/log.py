@@ -1,6 +1,7 @@
 import logging, os
 from datetime import datetime
 
+
 # Creating logs directory
 LOG_DIR = "logs"
 os.makedirs(LOG_DIR, exist_ok=True)
