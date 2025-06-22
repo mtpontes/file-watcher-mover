@@ -3,71 +3,138 @@ import shutil
 
 from watchdog.events import (FileCreatedEvent, FileMovedEvent)
 
-from src.utils import get_path_str
+from src.log import log
+from src.constants import Constants
+from src.config_model import ConfigModel
+from src.utils import get_path_str, resolve_destiny_path
 
 
 class FileService:
-    def __init__(self, extensions_map: dict):
-        self.extension_to_dir = extensions_map
+    def __init__(self, config: ConfigModel):
+        self.config: ConfigModel = config
 
     def handle_moved(self, event: FileMovedEvent):
-        print(f'{self.__class__.__name__} - handle_moved - Input')
+        """Handles file moved events.
+
+        Args:
+            event (FileMovedEvent): The file moved event to handle.
+        """
+        log.info("%s - handle_moved - Input", self.__class__.__name__)
         try:
             src_path: str = get_path_str(event.src_path)
             dest_path: str = get_path_str(event.dest_path)
-            print(f'{self.__class__.__name__} - handle_moved - Paths - src: {src_path}, dest: {dest_path}')
+            log.info("%s - handle_moved - Paths - src: %s, dest: %s",
+                     self.__class__.__name__, src_path, dest_path)
+
+            if self._is_temporary_file(src_path) and self._is_temporary_file(dest_path):
+                log.warning("%s - handle_moved - Output - Both paths are temporary. Ignoring event.",
+                            self.__class__.__name__)
+                return
+            
+            if os.path.dirname(src_path) != os.path.dirname(dest_path):
+                log.warning("%s - handle_moved - Output - src_path and dest_path are not in the same directory. Ignoring event.",
+                            self.__class__.__name__)
+                return
             
             src_extension: str = os.path.splitext(src_path)[1].lower()
-            dest_extension: str = os.path.splitext(dest_path)[1].lower()
-            print(f'{self.__class__.__name__} - handle_moved - Extensions - src: {src_extension}, dest: {dest_extension}')
+            if src_extension in Constants.TEMPORARY_FILE_EXTENSIONS.value:
+                log.info("%s - handle_moved - Tratando arquivo: %s", self.__class__.__name__, src_path)
+                file_name: str = os.path.basename(dest_path)
+                destiny_path: str | None = resolve_destiny_path(file_name, self.config)
+                if not destiny_path:
+                    log.warning("%s - handle_moved - Output - No configuration mapped to file: %s",
+                                self.__class__.__name__, file_name)
+                    return
+                
+                self.move_file(dest_path, destiny_path)
             
-            download_in_progress_extensions: list[str] = ['.tmp', '.crdownload', '.part', '.download']
-            if (src_extension in download_in_progress_extensions) and dest_extension in self.extension_to_dir.keys():
-                print(f'{self.__class__.__name__} - handle_moved - Tratando arquivo: {src_path}')
-                dest_final: str = self.extension_to_dir.get(dest_extension.lower())
-                self.move_file(dest_path, dest_final)
-            
-            print(f'{self.__class__.__name__} - handle_moved - Output')
+            log.info("%s - handle_moved - Output - File moved successfully", self.__class__.__name__)
+
         except Exception as e:
-            print(f'{self.__class__.__name__} - handle_moved - Error moving file: {e}')
+            log.error("%s - handle_moved - Error moving file: %s", self.__class__.__name__, e)
 
     def handle_created(self, event: FileCreatedEvent):
-        print(f'{self.__class__.__name__} - handle_created - Input')
+        """
+        Handles a created file event.
+
+        Args:
+            event (FileCreatedEvent): The created file event.
+        """
+        log.info("%s - handle_created - Input", self.__class__.__name__)
         try:
             if event.is_directory:
                 return
             event: FileCreatedEvent = event
             
             src_path: str = get_path_str(event.src_path)
-            extension: str = os.path.splitext(src_path)[1].lower()
-            dest_path: str = self.extension_to_dir.get(extension.lower())
-            if not dest_path:
-                print(f'{self.__class__.__name__} - handle_created - Format not supported: {src_path}')
+            if self._is_temporary_file(src_path):
+                log.warning("%s - handle_created - Output - Temporary file detected: %s",
+                            self.__class__.__name__, src_path)
                 return
             
-            self.move_file(src_path, dest_path)
-            
-            print(f'{self.__class__.__name__} - handle_created - Output')
+            file_name: str = os.path.basename(src_path)
+            destiny_path: str | None = resolve_destiny_path(file_name, self.config)
+            if not destiny_path:
+                log.warning("%s - handle_created - Output - No configuration mapped to file: %s",
+                            self.__class__.__name__, file_name)
+                return
+        
+            self.move_file(src_path, destiny_path)
+            log.info("%s - handle_created - Output - File moved successfully", self.__class__.__name__)
+
         except Exception as e:
-            print(f'{self.__class__.__name__} - handle_created - Error moving file: {e}')
+            log.error("%s - handle_created - Error moving file: %s", self.__class__.__name__, e)
 
     def move_file(self, src_path: str, destiny: str) -> None:
-        print(f'{self.__class__.__name__} - _move_file - Input - src_path: {src_path}, destiny: {destiny}')
-        try:
-            base_name = os.path.basename(src_path)
-            name, ext = os.path.splitext(base_name)
-            result_file_path = os.path.join(destiny, base_name)
+        """
+        Moves a file from the source path to the destination path.
+
+        Args:
+            src_path (str): The path of the file to be moved.
+            destiny (str): The path where the file should be moved.
+
+        Returns:
+            None
+        """
+        log.info("%s - _move_file - Input - src_path: %s, destiny: %s",
+                 self.__class__.__name__, src_path, destiny)
+        base_name = os.path.basename(src_path)
+        name, ext = os.path.splitext(base_name)
+        result_file_path = os.path.join(destiny, base_name)
+        result_file_path = os.path.abspath(result_file_path)
+
+        counter = 1
+        while os.path.exists(result_file_path):
+            result_file_path = os.path.join(destiny, f"{name} ({counter}){ext}")
             result_file_path = os.path.abspath(result_file_path)
+            counter += 1
 
-            counter = 1
-            while os.path.exists(result_file_path):
-                result_file_path = os.path.join(destiny, f"{name} ({counter}){ext}")
-                result_file_path = os.path.abspath(result_file_path)
-                counter += 1
+        file_abs_path = os.path.abspath(src_path)
+        os.makedirs(destiny, exist_ok=True)
+        shutil.move(file_abs_path, result_file_path)
+        log.info("%s - _move_file - Output", self.__class__.__name__)
 
-            file_abs_path = os.path.abspath(src_path)
-            os.makedirs(destiny, exist_ok=True)
-            shutil.move(file_abs_path, result_file_path)
-            print(f'{self.__class__.__name__} - _move_file - Output')
-        except Exception as e:
-            print(f'Exception: {e}, type: {{type(e)}}')
+    def move_once(self, targets: list[str]) -> None:
+        """
+        Function that performs file movement only once.
+        
+        :param targets: List of source directories to scan and move.
+        :param extension_to_dir_map: Dictionary mapping extensions to target directories.
+        """
+        for target_dir in targets:
+            for root, dirs, files in os.walk(target_dir):
+                for file in files:
+                    file_path = os.path.join(root, file)
+                    file_name: str = os.path.basename(file_path)
+                    destiny_path: str | None = resolve_destiny_path(file_name, self.config)
+                    if destiny_path:
+                        try:
+                            self.move_file(file_path, destiny_path)
+                        except Exception as e:
+                            log.error("Error moving %s: %s", file_path, e)
+
+    def _is_temporary_file(self, file_path: str) -> bool:
+        for temp_extension in Constants.TEMPORARY_FILE_EXTENSIONS.value:
+            if file_path.endswith(temp_extension):
+                return True
+        return False

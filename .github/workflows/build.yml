@@ -22,7 +22,7 @@ jobs:
 
       - name: Build executable with PyInstaller
         run: |
-          pyinstaller --onefile -n "file-watcher-mover.exe" main.py
+          pyinstaller --onefile --add-data "src\\config_schema.json;src" -n "file-watcher-mover.exe" main.py
 
       - name: Create package directory
         run: |

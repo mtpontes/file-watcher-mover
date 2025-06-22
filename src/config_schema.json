@@ -1,0 +1,60 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "extensionConfig": {
+      "type": "object",
+      "properties": {
+        "targets": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "extensionToPath": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string",
+            "minLength": 1
+          },
+          "propertyNames": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      },
+      "required": [
+        "targets",
+        "extensionToPath"
+      ],
+      "additionalProperties": false
+    },
+    "regexConfig": {
+      "type": "object",
+      "properties": {
+        "targets": {
+          "type": "array"
+        },
+        "patternToPath": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string",
+            "minLength": 1
+          },
+          "propertyNames": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      },
+      "required": [
+        "targets",
+        "patternToPath"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "extensionConfig",
+    "regexConfig"
+  ],
+  "additionalProperties": false
+}
