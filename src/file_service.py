@@ -23,31 +23,24 @@ class FileService:
         try:
             src_path: str = get_path_str(event.src_path)
             dest_path: str = get_path_str(event.dest_path)
-            log.info("%s - handle_moved - Paths - src: %s, dest: %s",
-                     self.__class__.__name__, src_path, dest_path)
+            log.info("%s - handle_moved - Paths - src: %s, dest: %s", self.__class__.__name__, src_path, dest_path)
 
-            if self._is_temporary_file(src_path) and self._is_temporary_file(dest_path):
-                log.warning("%s - handle_moved - Output - Both paths are temporary. Ignoring event.",
+            if self._is_temporary_file(dest_path):
+                log.warning("%s - handle_moved - Output - Final file will be temporary. Ignoring event.",
                             self.__class__.__name__)
                 return
             
             if os.path.dirname(src_path) != os.path.dirname(dest_path):
-                log.warning("%s - handle_moved - Output - src_path and dest_path are not in the same directory. Ignoring event.",
+                log.warning("%s - handle_moved - Output - Moving files out of the target directory. Ignoring event.",
                             self.__class__.__name__)
                 return
             
             src_extension: str = os.path.splitext(src_path)[1].lower()
             if src_extension in Constants.TEMPORARY_FILE_EXTENSIONS.value:
-                log.info("%s - handle_moved - Tratando arquivo: %s", self.__class__.__name__, src_path)
-                file_name: str = os.path.basename(dest_path)
-                destiny_path: str | None = resolve_destiny_path(file_name, self.config)
-                if not destiny_path:
-                    log.warning("%s - handle_moved - Output - No configuration mapped to file: %s",
-                                self.__class__.__name__, file_name)
+                log.info("%s - handle_moved - handling file: %s", self.__class__.__name__, src_path)
+                if not self._process_and_move_file(dest_path): 
                     return
                 
-                self.move_file(dest_path, destiny_path)
-            
             log.info("%s - handle_moved - Output - File moved successfully", self.__class__.__name__)
 
         except Exception as e:
@@ -72,20 +65,59 @@ class FileService:
                             self.__class__.__name__, src_path)
                 return
             
-            file_name: str = os.path.basename(src_path)
-            destiny_path: str | None = resolve_destiny_path(file_name, self.config)
-            if not destiny_path:
-                log.warning("%s - handle_created - Output - No configuration mapped to file: %s",
-                            self.__class__.__name__, file_name)
+            if not self._process_and_move_file(src_path):
                 return
-        
-            self.move_file(src_path, destiny_path)
+            
             log.info("%s - handle_created - Output - File moved successfully", self.__class__.__name__)
 
         except Exception as e:
             log.error("%s - handle_created - Error moving file: %s", self.__class__.__name__, e)
 
-    def move_file(self, src_path: str, destiny: str) -> None:
+
+    def move_once(self, targets: list[str]) -> None:
+        """
+        Function that performs file movement only once.
+        
+        :param targets: List of source directories to scan and move.
+        :param extension_to_dir_map: Dictionary mapping extensions to target directories.
+        """
+        for target_dir in targets:
+            for root, _, files in os.walk(target_dir):
+                for file in files:
+                    try:
+                        file_path = os.path.join(root, file)
+                        self._process_and_move_file(file_path)
+                    except Exception as e:
+                        log.error("Error moving %s: %s", file_path, e)
+
+    def _is_temporary_file(self, file_path: str) -> bool:
+        for temp_extension in Constants.TEMPORARY_FILE_EXTENSIONS.value:
+            if file_path.endswith(temp_extension):
+                return True
+        return False
+
+    def _process_and_move_file(self, file_path: str) -> bool:
+        """
+        Processes a file by resolving its destiny path and moving it if a valid destination is found.
+        
+        Args:
+            file_path (str): The path of the file to process and move.
+            
+        Returns:
+            bool: True if the file was successfully moved, False otherwise.
+        """
+        file_name: str = os.path.basename(file_path)
+        destiny_path: str | None = resolve_destiny_path(file_name, self.config)
+        
+        if not destiny_path:
+            log.warning("%s - _process_and_move_file - Output - No configuration mapped to file: %s",
+                        self.__class__.__name__, file_name)
+            return False
+        
+        self._move_file(file_path, destiny_path)
+        return True
+
+    def _move_file(self, src_path: str, destiny: str) -> None:
         """
         Moves a file from the source path to the destination path.
 
@@ -96,8 +128,7 @@ class FileService:
         Returns:
             None
         """
-        log.info("%s - _move_file - Input - src_path: %s, destiny: %s",
-                 self.__class__.__name__, src_path, destiny)
+        log.info("%s - _move_file - Input - src_path: %s, destiny: %s", self.__class__.__name__, src_path, destiny)
         base_name = os.path.basename(src_path)
         name, ext = os.path.splitext(base_name)
         result_file_path = os.path.join(destiny, base_name)
@@ -113,28 +144,3 @@ class FileService:
         os.makedirs(destiny, exist_ok=True)
         shutil.move(file_abs_path, result_file_path)
         log.info("%s - _move_file - Output", self.__class__.__name__)
-
-    def move_once(self, targets: list[str]) -> None:
-        """
-        Function that performs file movement only once.
-        
-        :param targets: List of source directories to scan and move.
-        :param extension_to_dir_map: Dictionary mapping extensions to target directories.
-        """
-        for target_dir in targets:
-            for root, dirs, files in os.walk(target_dir):
-                for file in files:
-                    file_path = os.path.join(root, file)
-                    file_name: str = os.path.basename(file_path)
-                    destiny_path: str | None = resolve_destiny_path(file_name, self.config)
-                    if destiny_path:
-                        try:
-                            self.move_file(file_path, destiny_path)
-                        except Exception as e:
-                            log.error("Error moving %s: %s", file_path, e)
-
-    def _is_temporary_file(self, file_path: str) -> bool:
-        for temp_extension in Constants.TEMPORARY_FILE_EXTENSIONS.value:
-            if file_path.endswith(temp_extension):
-                return True
-        return False
