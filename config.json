@@ -1,5 +1,10 @@
 {
-  "targets": [],
-  "extension": {
+  "extensionConfig": {
+    "targets": [],
+    "extensionToPath": {}
+  },
+  "regexConfig": {
+    "targets": [],
+    "patternToPath": {}
   }
 }

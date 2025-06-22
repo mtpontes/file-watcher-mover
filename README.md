@@ -23,11 +23,17 @@ The system uses the [watchdog](https://pypi.org/project/watchdog/) library to ob
 > Example:
 > ```json
 > {
->   "targets": [
->     "C:\\Users\\your_user\\Downloads"
->   ],
->   "extension": {
->     ".pdf": "C:\\Users\\your_user\\Documents\\pdf"
+>   "extensionConfig": {
+>     "targets": ["C:\\Users\\your_user\\google_drive"],
+>     "extensionToPath": {
+>       ".pdf": "C:\\Users\\your_user\\Documents\\pdf"
+>     }
+>   },
+>   "regexConfig": {
+>     "targets": ["C:\\Users\\your_user\\azure"],
+>     "patternToPath": {
+>       "^[a-f0-9]{32}( \\(\d+\\))?$": "C:\\Users\\your_user\\Documents\\college\\docs"
+>     }
 >   }
 > }
 > ```
@@ -43,6 +49,10 @@ Edit the `config.json` file to define the monitored directories and the destinat
 
 <details>
   <summary><h2>How to Run</h2></summary>
+
+| Options | Description |
+| ------- | ----------- |
+| `--once` | Run only once. |
 
 <details>
   <summary><h4>Executable</h4></summary>
@@ -87,18 +97,28 @@ The program will stay running, monitoring the defined directories. To stop it, p
 
 This is the approach I recommend the most, I created this app precisely with the intention of using it as a Windows service.
 
-<!-- ### Build
+<details>
+  <summary><h3>Build (optional)</h3></summary>
+If you downloaded File-Watcher-Move-Win64.zip of the releases, you don't need to run the built.
+
 #### Prerequisites
 - Pyinstaller
 
-```sh
+<!-- ```sh
 pyinstaller --onefile main.py
 ``` -->
 
-<!-- **Build together with the configuration file:**
-```sh
-pyinstaller --onefile --add-data "config.json;." main.py
-``` -->
+#### Packaging
+1. Install the dependencies:
+   ```sh
+   pip install -r requirements.txt
+   ```
+
+2. Build together with the configuration schema file:
+    ```sh
+    pyinstaller --onefile --add-data "src\\config_schema.json;src" -n "file-watcher-mover.exe" main.py
+    ```
+</details>
 
 ### Prerequisites
 - NSSM CLI
