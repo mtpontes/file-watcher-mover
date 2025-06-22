@@ -33,7 +33,7 @@ The system uses the [watchdog](https://pypi.org/project/watchdog/) library to ob
 >   "regexConfig": {
 >     "targets": ["C:\\Users\\your_user\\azure"],
 >     "patternToPath": {
->       "^[a-f0-9]{32}( \\(\d+\\))?$": "C:\\Users\\your_user\\Documents\\college\\docs"
+>       "^[a-f0-9]{32}( \\(\\d+\\))?$": "C:\\Users\\your_user\\Documents\\college\\docs"
 >     }
 >   }
 > }
