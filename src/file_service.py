@@ -1,11 +1,11 @@
 import os
 import shutil
 
-from watchdog.events import (FileCreatedEvent, FileMovedEvent)
+from watchdog.events import FileCreatedEvent, FileMovedEvent
 
-from src.log import log
-from src.constants import Constants
 from src.config_model import ConfigModel
+from src.constants import Constants
+from src.log import log
 from src.utils import get_path_str, resolve_destiny_path
 
 
@@ -26,21 +26,25 @@ class FileService:
             log.info("%s - handle_moved - Paths - src: %s, dest: %s", self.__class__.__name__, src_path, dest_path)
 
             if self._is_temporary_file(dest_path):
-                log.warning("%s - handle_moved - Output - Final file will be temporary. Ignoring event.",
-                            self.__class__.__name__)
+                log.warning(
+                    "%s - handle_moved - Output - Final file will be temporary. Ignoring event.",
+                    self.__class__.__name__,
+                )
                 return
-            
+
             if os.path.dirname(src_path) != os.path.dirname(dest_path):
-                log.warning("%s - handle_moved - Output - Moving files out of the target directory. Ignoring event.",
-                            self.__class__.__name__)
+                log.warning(
+                    "%s - handle_moved - Output - Moving files out of the target directory. Ignoring event.",
+                    self.__class__.__name__,
+                )
                 return
-            
+
             src_extension: str = os.path.splitext(src_path)[1].lower()
             if src_extension in Constants.TEMPORARY_FILE_EXTENSIONS.value:
                 log.info("%s - handle_moved - handling file: %s", self.__class__.__name__, src_path)
-                if not self._process_and_move_file(dest_path): 
+                if not self._process_and_move_file(dest_path):
                     return
-                
+
             log.info("%s - handle_moved - Output - File moved successfully", self.__class__.__name__)
 
         except Exception as e:
@@ -58,26 +62,26 @@ class FileService:
             if event.is_directory:
                 return
             event: FileCreatedEvent = event
-            
+
             src_path: str = get_path_str(event.src_path)
             if self._is_temporary_file(src_path):
-                log.warning("%s - handle_created - Output - Temporary file detected: %s",
-                            self.__class__.__name__, src_path)
+                log.warning(
+                    "%s - handle_created - Output - Temporary file detected: %s", self.__class__.__name__, src_path,
+                )
                 return
-            
+
             if not self._process_and_move_file(src_path):
                 return
-            
+
             log.info("%s - handle_created - Output - File moved successfully", self.__class__.__name__)
 
         except Exception as e:
             log.error("%s - handle_created - Error moving file: %s", self.__class__.__name__, e)
 
-
     def move_once(self, targets: list[str]) -> None:
         """
         Function that performs file movement only once.
-        
+
         :param targets: List of source directories to scan and move.
         :param extension_to_dir_map: Dictionary mapping extensions to target directories.
         """
@@ -99,21 +103,24 @@ class FileService:
     def _process_and_move_file(self, file_path: str) -> bool:
         """
         Processes a file by resolving its destiny path and moving it if a valid destination is found.
-        
+
         Args:
             file_path (str): The path of the file to process and move.
-            
+
         Returns:
             bool: True if the file was successfully moved, False otherwise.
         """
         file_name: str = os.path.basename(file_path)
         destiny_path: str | None = resolve_destiny_path(file_name, self.config)
-        
+
         if not destiny_path:
-            log.warning("%s - _process_and_move_file - Output - No configuration mapped to file: %s",
-                        self.__class__.__name__, file_name)
+            log.warning(
+                "%s - _process_and_move_file - Output - No configuration mapped to file: %s",
+                self.__class__.__name__,
+                file_name,
+            )
             return False
-        
+
         self._move_file(file_path, destiny_path)
         return True
 

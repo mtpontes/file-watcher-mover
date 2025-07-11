@@ -1,6 +1,6 @@
-import logging, os
+import logging
+import os
 from datetime import datetime
-
 
 # Creating logs directory
 LOG_DIR = "logs"
@@ -15,9 +15,7 @@ file_handler = logging.FileHandler(log_filename, encoding="utf-8")
 console_handler = logging.StreamHandler()
 
 logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s [%(levelname)s] %(message)s",
-    handlers=[file_handler, console_handler]
+    level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s", handlers=[file_handler, console_handler],
 )
 
 logger = logging.getLogger(__name__)
