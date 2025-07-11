@@ -103,10 +103,6 @@ If you downloaded File-Watcher-Move-Win64.zip of the releases, you don't need to
 #### Prerequisites
 - Pyinstaller
 
-<!-- ```sh
-pyinstaller --onefile main.py
-``` -->
-
 #### Packaging
 1. Install the dependencies:
    ```sh
