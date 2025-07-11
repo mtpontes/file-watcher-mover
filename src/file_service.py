@@ -66,7 +66,9 @@ class FileService:
             src_path: str = get_path_str(event.src_path)
             if self._is_temporary_file(src_path):
                 log.warning(
-                    "%s - handle_created - Output - Temporary file detected: %s", self.__class__.__name__, src_path,
+                    "%s - handle_created - Output - Temporary file detected: %s",
+                    self.__class__.__name__,
+                    src_path,
                 )
                 return
 
