@@ -1,69 +1,72 @@
-name: Publish Release
+name: File Watcher Mover - Publish Release
 
 on:
-  workflow_call:
-    inputs:
-      release-version:
-        description: 'Version number extracted from commit message (e.g., 1.2.3)'
-        required: true
-        type: string
+  push:
+    branches: [ "main" ]
 
 jobs:
-  release-publisher:
+  lint:
+    uses: ./.github/workflows/reusable/lint.yml
+
+  # Only execute if the PR comes from a 'release' branch
+  check-branch:
     runs-on: ubuntu-latest
+    outputs:
+      is-merge-from-release: ${{ steps.check.outputs.is-merge-from-release }}
+      release-version: ${{ steps.check.outputs.release-version }}
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Download build artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: file-watcher-mover-win64
-          path: ./
-
-      - name: Prepare version and validate
-        id: version
+      - name: Check if branch is release
+        id: check
         run: |
-          VERSION="${{ inputs.release-version }}"
-          echo "Received version: $VERSION"
+          COMMIT_MESSAGE="${{ github.event.head_commit.message }}"
+          echo "Commit message: $COMMIT_MESSAGE"
           
-          # Valida se está no formato x.x.x
-          if [[ ! $VERSION =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-            echo "❌ Error: Version should follow pattern x.x.x, got: $VERSION"
-            exit 1
+          # Converts to tiny to comparison case-insensitive
+          COMMIT_MESSAGE_LOWER=$(echo "$COMMIT_MESSAGE" | tr '[:upper:]' '[:lower:]')
+          
+          # Check if it contains the word 'merge'
+          if [[ "$COMMIT_MESSAGE_LOWER" == *"merge"* ]]; then
+            echo "✓ Commit message contains 'merge'"
+            HAS_MERGE=true
+          else
+            echo "✗ Commit message does not contain 'merge'"
+            HAS_MERGE=false
           fi
           
-          # Adds the 'v' prefix to the tag
-          VERSION_TAG="v$VERSION"
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
-          echo "version-tag=$VERSION_TAG" >> $GITHUB_OUTPUT
-          echo "✅ Version validated and prepared: $VERSION_TAG"
+          # Check if it contains standard release/x.x.x using GREP
+          if echo "$COMMIT_MESSAGE" | grep -qE "release/[0-9]+\.[0-9]+\.[0-9]+"; then
+            echo "✓ Commit message contains release version pattern"
+            HAS_RELEASE=true
+            # Extrai a versão usando sed
+            RELEASE_VERSION=$(echo "$COMMIT_MESSAGE" | grep -oE "release/[0-9]+\.[0-9]+\.[0-9]+" | sed 's/release\///')
+            echo "Extracted version: $RELEASE_VERSION"
+          else
+            echo "✗ Commit message does not contain release version pattern"
+            HAS_RELEASE=false
+            RELEASE_VERSION=""
+          fi
+          
+          # Checks both conditions
+          if [[ "$HAS_MERGE" == true && "$HAS_RELEASE" == true ]]; then
+            echo "🎉 Push is a merge from a release branch"
+            echo "is-merge-from-release=true" >> $GITHUB_OUTPUT
+            echo "release-version=$RELEASE_VERSION" >> $GITHUB_OUTPUT
+          else
+            echo "❌ Push is not a merge from a release branch"
+            echo "is-merge-from-release=false" >> $GITHUB_OUTPUT
+            echo "release-version=" >> $GITHUB_OUTPUT
+          fi
 
-      - name: Create Release
-        id: create_release
-        uses: softprops/action-gh-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.TOKEN_GITHUB }}
-        with:
-          tag_name: ${{ steps.version.outputs.version-tag }}
-          name: ${{ steps.version.outputs.version-tag }}
-          body: |
-            ## Changes
-            
-            Release automatically created from merge commit.
-            Version: `${{ steps.version.outputs.version }}`
-            
-            ### Downloads
-            - **file-watcher-mover-win64.zip**: Executable for Windows 64-bit
-            
-            ### How to use
-            1. Download the `file-watcher-mover-win64.zip` file
-            2. Extract it to a folder of your choice
-            3. Configure the `config.json` file as needed
-            4. Run `file-watcher-mover.exe`
-            
-            ---
-            *This release was automatically generated from commit: `${{ github.sha }}`*
-          draft: false
-          prerelease: false
-          files: ./file-watcher-mover-win64.zip
+  build:
+    needs: check-branch
+    if: needs.check-branch.outputs.is-merge-from-release == 'true'
+    uses: ./.github/workflows/reusable/build.yml
+    secrets: inherit
+
+  publish-release:
+    needs: [check-branch, build]
+    if: needs.check-branch.outputs.is-merge-from-release == 'true'
+    uses: ./.github/workflows/reusable/publish.yml
+    with:
+      release-version: ${{ needs.check-branch.outputs.release-version }}
+    secrets: inherit

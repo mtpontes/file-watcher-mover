@@ -120,7 +120,6 @@ If you downloaded File-Watcher-Move-Win64.zip of the releases, you don't need to
 - The executable of this application, available in the [releases page](https://github.com/mtpontes/file-watcher-mover/releases)
 
 
-
 ### Turning into a Windows service
 > **WARNING**\
 > **For this step it is necessary to execute the terminal as administrator.**
