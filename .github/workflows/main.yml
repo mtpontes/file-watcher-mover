@@ -54,6 +54,10 @@ jobs:
             echo "release-version=" >> $GITHUB_OUTPUT
           fi
 
+  lint:
+    uses: ./.github/workflows/lint.yml
+    secrets: inherit
+
   build:
     needs: check-branch
     if: needs.check-branch.outputs.is-merge-from-release == 'true'
