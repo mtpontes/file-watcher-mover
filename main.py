@@ -10,7 +10,7 @@ from src.log import log
 from src.utils import config_loader, display_start_message
 
 
-def run():
+def run() -> None:
     """
     Main function that initializes and runs the file monitoring service.
 
@@ -42,7 +42,7 @@ def run():
     start_observer(targets, event_handler)
 
 
-def start_observer(targets: list[str], handler: DirHandler):
+def start_observer(targets: list[str], handler: DirHandler) -> None:
     """
     Starts and manages file system observers for monitoring specified directories.
 

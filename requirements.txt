@@ -1,2 +1,5 @@
 watchdog
 jsonschema
+
+ruff
+black

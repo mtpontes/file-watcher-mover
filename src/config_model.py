@@ -18,7 +18,7 @@ class ConfigModel:
     extension_config: ExtensionConfig
     pattern_config: PatternConfig
 
-    def __init__(self, configs: dict):
+    def __init__(self, configs: dict) -> None:
         extension_config_data = configs["extensionConfig"]
         self.extension_config = ExtensionConfig(
             targets=extension_config_data["targets"],

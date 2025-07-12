@@ -6,7 +6,7 @@ from src.file_service import FileService
 
 
 class DirHandler(FileSystemEventHandler):
-    def __init__(self, file_service: FileService):
+    def __init__(self, file_service: FileService) -> None:
         self.file_service = file_service
 
     def on_moved(self, event: DirMovedEvent | FileMovedEvent) -> None:
@@ -15,7 +15,7 @@ class DirHandler(FileSystemEventHandler):
             return
         self.file_service.handle_moved(event)
 
-    def on_created(self, event: DirCreatedEvent | FileCreatedEvent):
+    def on_created(self, event: DirCreatedEvent | FileCreatedEvent) -> None:
         time.sleep(0.5)  # Small delay to ensure the file system is updated
         if event.is_directory:
             return

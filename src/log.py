@@ -1,13 +1,13 @@
 import logging
-import os
-from datetime import datetime
+from datetime import UTC, datetime
+from pathlib import Path
 
 # Creating logs directory
 LOG_DIR = "logs"
-os.makedirs(LOG_DIR, exist_ok=True)
+Path(LOG_DIR).mkdir(parents=True, exist_ok=True)
 
 # File name with timestamp (ex: app_2025-06-22_13-02-30.log)
-timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+timestamp = datetime.now(UTC).strftime("%Y-%m-%d_%H-%M-%S")
 log_filename = f"{LOG_DIR}/app_{timestamp}.log"
 
 # Configure logger

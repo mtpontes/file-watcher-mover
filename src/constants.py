@@ -2,7 +2,7 @@ from enum import Enum
 
 
 class Constants(Enum):
-    TEMPORARY_FILE_EXTENSIONS = [
+    TEMPORARY_FILE_EXTENSIONS = (
         # Browsers
         ".tmp",
         ".crdownload",
@@ -30,4 +30,4 @@ class Constants(Enum):
         ".dap",
         ".jc!",
         ".fget",
-    ]
+    )

@@ -1,7 +1,7 @@
 import json
-import os
 import re
 import sys
+from pathlib import Path
 
 import jsonschema
 
@@ -11,19 +11,21 @@ from src.log import log
 
 def config_loader() -> dict:
     def read_config_schema() -> dict:
+        # Packaged with PyInstaller
         if getattr(sys, "frozen", False):
-            # Packaged with PyInstaller
-            base_dir = sys._MEIPASS  # Temporary folder where files are extracted
-            schema_path = os.path.join(base_dir, "src", "config_schema.json")
+            # Temporary folder where files are extracted
+            base_dir = sys._MEIPASS  # noqa: SLF001
+            schema_path = base_dir / "src" / "config_schema.json"
         else:
             # Running as script
-            current_dir = os.path.dirname(os.path.abspath(__file__))  # /src
-            schema_path = os.path.join(current_dir, "config_schema.json")
+            current_dir = Path(__file__).resolve().parent
+            schema_path = current_dir / "config_schema.json"
 
-        if not os.path.exists(schema_path):
-            raise FileNotFoundError(f"Schema file not found: {schema_path}")
+        if not Path(schema_path).exists():
+            msg = f"Schema file not found: {schema_path}"
+            raise FileNotFoundError(msg)
 
-        with open(schema_path, encoding="utf-8") as file:
+        with Path(schema_path).open(encoding="utf-8") as file:
             schema: dict = json.load(file)
 
         return schema
@@ -32,26 +34,25 @@ def config_loader() -> dict:
         # Always seek config.json in the same directory as main.py or .exe
         if getattr(sys, "frozen", False):
             # Executable: sys.executable supports the .exe
-            base_dir: str = os.path.dirname(sys.executable)
+            base_dir: str = Path(sys.executable).parent
         else:
             # Script: __file__ points to config.py, go up one level to the main.py directory
-            base_dir: str = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-        config_path: str = os.path.join(base_dir, "config.json")
+            base_dir: str = str(Path(__file__).resolve().parent.parent)
+        config_path: str = Path(base_dir) / "config.json"
 
-        if not os.path.exists(config_path):
-            raise FileNotFoundError(f"Config file not found: {config_path}")
+        if not Path(config_path).exists():
+            msg = f"Config file not found: {config_path}"
+            raise FileNotFoundError(msg)
 
-        with open(config_path, encoding="utf-8") as file:
-            configs: dict = json.load(file)
-
-        return configs
+        with Path(config_path).open(encoding="utf-8") as file:
+            return json.load(file)
 
     schema, configs = read_config_schema(), read_config_file()
     try:
         jsonschema.validate(instance=configs, schema=schema)
     except Exception as e:
         log.error("Erro: %s", e)
-        raise e
+        raise
 
     return configs
 
@@ -62,7 +63,7 @@ def get_path_str(path: str | bytes) -> str:
     return path
 
 
-def display_start_message(extension_to_dir_map: dict):
+def display_start_message(extension_to_dir_map: dict) -> None:
     log.info("=" * 50)
     log.info("🗂️  File Watcher Mover")
     log.info("Directory configuration:")
@@ -78,7 +79,9 @@ def resolve_destiny_path(filename: str, config: ConfigModel) -> str | None:
     :param config: Instance of ConfigModel
     :return: Destination path or None
     """
-    name, ext = os.path.splitext(filename)
+    path_filename = Path(filename)
+    name = path_filename.stem
+    ext = path_filename.suffix.lower()
 
     for pattern, path in config.pattern_config.pattern_to_path.items():
         log.debug("Pattern: %s, Path: %s, Name: %s", pattern, path, name)
