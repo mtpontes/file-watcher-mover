@@ -103,10 +103,6 @@ If you downloaded File-Watcher-Move-Win64.zip of the releases, you don't need to
 #### Prerequisites
 - Pyinstaller
 
-<!-- ```sh
-pyinstaller --onefile main.py
-``` -->
-
 #### Packaging
 1. Install the dependencies:
    ```sh
@@ -122,7 +118,6 @@ pyinstaller --onefile main.py
 ### Prerequisites
 - NSSM CLI
 - The executable of this application, available in the [releases page](https://github.com/mtpontes/file-watcher-mover/releases)
-
 
 
 ### Turning into a Windows service
