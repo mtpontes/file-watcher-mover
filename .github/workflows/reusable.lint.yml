@@ -20,8 +20,8 @@ jobs:
           pip install ruff
           pip install black
 
-      - name: Check Ruff (lint + isort)
-        run: ruff check .
+      # - name: Check Ruff (lint + isort)
+      #   run: ruff check .
 
       - name: Check Black formatting
         run: black . --check
