@@ -57,13 +57,13 @@ jobs:
   build:
     needs: check-branch
     if: needs.check-branch.outputs.is-merge-from-release == 'true'
-    uses: ./.github/workflows/build.yml
+    uses: ./.github/workflows/reusable.build.yml
     secrets: inherit
 
   publish-release:
     needs: [check-branch, build]
     if: needs.check-branch.outputs.is-merge-from-release == 'true'
-    uses: ./.github/workflows/publish-release.yml
+    uses: ./.github/workflows/reusable.publish-release.yml
     with:
       release-version: ${{ needs.check-branch.outputs.release-version }}
     secrets: inherit
