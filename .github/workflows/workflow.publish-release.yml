@@ -1,13 +1,10 @@
-name: File Watcher Mover - Publish Release
+name: File Watcher Mover
 
 on:
   push:
     branches: [ "main" ]
 
 jobs:
-  lint:
-    uses: ./.github/workflows/reusable/lint.yml
-
   # Only execute if the PR comes from a 'release' branch
   check-branch:
     runs-on: ubuntu-latest
@@ -60,13 +57,13 @@ jobs:
   build:
     needs: check-branch
     if: needs.check-branch.outputs.is-merge-from-release == 'true'
-    uses: ./.github/workflows/reusable/build.yml
+    uses: ./.github/workflows/reusable.build.yml
     secrets: inherit
 
   publish-release:
     needs: [check-branch, build]
     if: needs.check-branch.outputs.is-merge-from-release == 'true'
-    uses: ./.github/workflows/reusable/publish.yml
+    uses: ./.github/workflows/reusable.publish-release.yml
     with:
       release-version: ${{ needs.check-branch.outputs.release-version }}
     secrets: inherit
