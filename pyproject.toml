@@ -1,0 +1,15 @@
+[tool.black]
+line-length = 120
+target-version = ['py313']
+
+[tool.ruff]
+line-length = 120
+target-version = "py313"
+select = ["ALL"]
+ignore = ["D", "BLE001"]
+fix = true
+show-fixes = true
+
+[tool.ruff.isort]
+known-first-party = ["seu_pacote"]
+combine-as-imports = true
