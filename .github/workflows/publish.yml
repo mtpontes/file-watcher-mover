@@ -54,16 +54,19 @@ jobs:
             echo "release-version=" >> $GITHUB_OUTPUT
           fi
 
+  lint:
+    uses: ./.github/actions/lint.yml
+
   build:
     needs: check-branch
     if: needs.check-branch.outputs.is-merge-from-release == 'true'
-    uses: ./.github/workflows/reusable.build.yml
+    uses: ./.github/actions/build.yml
     secrets: inherit
 
   publish-release:
     needs: [check-branch, build]
     if: needs.check-branch.outputs.is-merge-from-release == 'true'
-    uses: ./.github/workflows/reusable.publish-release.yml
+    uses: ./.github/actions/publish-repository-release.yml
     with:
       release-version: ${{ needs.check-branch.outputs.release-version }}
     secrets: inherit

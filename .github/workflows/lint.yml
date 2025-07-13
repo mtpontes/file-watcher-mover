@@ -10,4 +10,4 @@ on:
 
 jobs:
   lint:
-    uses: ./.github/workflows/reusable.lint.yml
+    uses: ./.github/actions/lint.yml
