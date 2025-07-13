@@ -14,8 +14,8 @@ def config_loader() -> dict:
         # Packaged with PyInstaller
         if getattr(sys, "frozen", False):
             # Temporary folder where files are extracted
-            base_dir = sys._MEIPASS  # noqa: SLF001
-            schema_path = base_dir / "src" / "config_schema.json"
+            base_dir = Path(sys._MEIPASS)  # noqa: SLF001
+            schema_path: Path = base_dir / "src" / "config_schema.json"
         else:
             # Running as script
             current_dir = Path(__file__).resolve().parent
