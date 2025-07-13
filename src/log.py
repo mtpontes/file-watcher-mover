@@ -15,7 +15,7 @@ file_handler = logging.FileHandler(log_filename, encoding="utf-8")
 console_handler = logging.StreamHandler()
 
 logging.basicConfig(
-    level=logging.INFO,
+    level=logging.DEBUG,
     format="%(asctime)s [%(levelname)s] %(message)s",
     handlers=[file_handler, console_handler],
 )

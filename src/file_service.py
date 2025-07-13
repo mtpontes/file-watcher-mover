@@ -41,7 +41,7 @@ class FileService:
                 return
 
             src_extension: str = Path(src_path).suffix.lower()
-            if src_extension in Constants.TEMPORARY_FILE_EXTENSIONS:
+            if src_extension in Constants.TEMPORARY_FILE_EXTENSIONS.value:
                 log.info("%s - handle_moved - handling file: %s", self.__class__.__name__, src_path)
                 if not self._process_and_move_file(dest_path):
                     return
@@ -97,9 +97,9 @@ class FileService:
                         log.error("Error moving %s: %s", file_path, e)
 
     def _is_temporary_file(self, file_path: str) -> bool:
-        return any(file_path.endswith(ext) for ext in Constants.TEMPORARY_FILE_EXTENSIONS)
+        return any(file_path.endswith(ext) for ext in Constants.TEMPORARY_FILE_EXTENSIONS.value)
 
-    def _process_and_move_file(self, file_path: str) -> bool:
+    def _process_and_move_file(self, file_path: Path) -> bool:
         """
         Processes a file by resolving its destiny path and moving it if a valid destination is found.
 
@@ -109,44 +109,42 @@ class FileService:
         Returns:
             bool: True if the file was successfully moved, False otherwise.
         """
-        file_name: str = Path(file_path).name
-        destiny_path: str | None = resolve_destiny_path(file_name, self.config)
-
+        destiny_path: str | None = resolve_destiny_path(file_path, self.config)
         if not destiny_path:
-            log.warning(
+            log.info(
                 "%s - _process_and_move_file - Output - No configuration mapped to file: %s",
                 self.__class__.__name__,
-                file_name,
+                file_path.name,
             )
             return False
 
         self._move_file(file_path, destiny_path)
         return True
 
-    def _move_file(self, src_path: str, destiny: str) -> None:
+    def _move_file(self, file_path: Path, destiny: str) -> None:
         """
         Moves a file from the source path to the destination path.
 
         Args:
-            src_path (str): The path of the file to be moved.
-            destiny (str): The path where the file should be moved.
+            src_path (Path): The path of the file to be moved.
+            destiny (Path): The path where the file should be moved.
 
         Returns:
             None
         """
-        log.info("%s - _move_file - Input - src_path: %s, destiny: %s", self.__class__.__name__, src_path, destiny)
-        base_name = Path(src_path).name
-        name = Path(src_path).stem
-        ext = Path(src_path).suffix
-        result_file_path = (Path(destiny) / base_name).resolve()
+        log.info("%s - _move_file - Input - src_path: %s, destiny: %s", self.__class__.__name__, file_path, destiny)
+        base_name: str = file_path.name
+        name: str = file_path.stem
+        extension: str = file_path.suffix
+        result_file_path: Path = (Path(destiny) / base_name).resolve()
 
         counter = 1
         while Path(result_file_path).exists():
-            result_file_path = Path(destiny) / f"{name} ({counter}){ext}"
+            result_file_path = Path(destiny) / f"{name} ({counter}){extension}"
             result_file_path = result_file_path.resolve()
             counter += 1
 
-        file_abs_path: str = str(Path(src_path).absolute())
+        file_absolute_path: str = str(file_path.absolute())
         Path(destiny).mkdir(parents=True, exist_ok=True)
-        shutil.move(file_abs_path, result_file_path)
+        shutil.move(file_absolute_path, result_file_path)
         log.info("%s - _move_file - Output", self.__class__.__name__)
