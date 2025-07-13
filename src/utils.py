@@ -72,21 +72,58 @@ def display_start_message(extension_to_dir_map: dict) -> None:
     log.info("=" * 50)
 
 
-def resolve_destiny_path(filename: str, config: ConfigModel) -> str | None:
-    """
-    Returns the destination path for a file based on patterns and extensions.
-    :param filename: Name of the file (ex: foto.png)
-    :param config: Instance of ConfigModel
-    :return: Destination path or None
-    """
-    path_filename = Path(filename)
-    name = path_filename.stem
-    ext = path_filename.suffix.lower()
+def _resolve_destiny_by_pattern(file_path: Path, config: ConfigModel) -> str | None:
+    file_path_parent = file_path.parent.resolve()
+    file_name_stem = file_path.stem
 
     for pattern, path in config.pattern_config.pattern_to_path.items():
-        log.debug("Pattern: %s, Path: %s, Name: %s", pattern, path, name)
-        log.debug("Is valid: %s", re.match(pattern, name))
-        if re.fullmatch(pattern, name) is not None:
-            return path
+        destiny_dir = Path(path).resolve()
 
-    return config.extension_config.extension_to_path.get(ext.lower())
+        if file_path_parent == destiny_dir:
+            log.debug("Skipping pattern %s because source and destiny are the same: %s", pattern, destiny_dir)
+            continue
+
+        is_match = re.fullmatch(pattern, file_name_stem)
+        log.debug(
+            "Checking pattern: %s | Directory: %s | File name: %s | Match: %s",
+            pattern,
+            destiny_dir,
+            file_name_stem,
+            bool(is_match),
+        )
+        if is_match:
+            return str(destiny_dir)
+
+    return None
+
+
+def _resolve_destiny_by_extension(file_path: Path, config: ConfigModel) -> str | None:
+    file_path_parent = file_path.parent.resolve()
+    file_ext = file_path.suffix.lower()
+
+    extension_destiny = config.extension_config.extension_to_path.get(file_ext)
+    if extension_destiny:
+        destiny_dir = Path(extension_destiny).resolve()
+        if file_path_parent == destiny_dir:
+            log.debug("Skipping extension mapping because source and destiny are the same: %s", destiny_dir)
+            return None
+        log.debug("Destination by extension: %s", destiny_dir)
+        return str(destiny_dir)
+
+    return None
+
+
+def resolve_destiny_path(file_path: Path, config: ConfigModel) -> str | None:
+    """
+    Returns the destination directory for a file based on patterns and extensions.
+    """
+    destiny = _resolve_destiny_by_pattern(file_path, config)
+    if destiny:
+        return destiny
+
+    destiny = _resolve_destiny_by_extension(file_path, config)
+    if destiny:
+        return destiny
+
+    log.debug("No destination found for file: %s", file_path)
+    return None
