@@ -1,7 +1,9 @@
 # File Watcher Mover
 This project monitors one or more directories and automatically moves files newly created or renamed to other directories based on their extensions or a regular expression pattern. Ideal for organizing downloads, images, videos and other file types automatically.
 
-![Application Flow example](./assets/app-flow-example.png)
+<p align="center">
+  <img src="./assets/app-flow-example.svg" alt="app-flow-example"/>
+</p>
 
 ## Features
 
