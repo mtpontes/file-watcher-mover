@@ -2,10 +2,10 @@ name: Lint
 
 on:
   push:
-    branches-ignore:
-      - main
+    branches:
+      - '**'
   pull_request:
-    branches-ignore:
+    branches:
       - main
 
 jobs:
