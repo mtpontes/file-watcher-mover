@@ -57,10 +57,10 @@ def config_loader() -> dict:
     return configs
 
 
-def get_path_str(path: str | bytes) -> str:
+def get_path(path: str | bytes) -> Path:
     if isinstance(path, bytes):
-        return path.decode("utf-8", errors="replace")
-    return path
+        return Path(path.decode("utf-8", errors="replace"))
+    return Path(path)
 
 
 def display_start_message(extension_to_dir_map: dict) -> None:

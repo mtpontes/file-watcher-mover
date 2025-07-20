@@ -7,7 +7,7 @@ from watchdog.events import FileCreatedEvent, FileMovedEvent
 from src.config_model import ConfigModel
 from src.constants import Constants
 from src.log import log
-from src.utils import get_path_str, resolve_destiny_path
+from src.utils import get_path, resolve_destiny_path
 
 
 class FileService:
@@ -22,8 +22,8 @@ class FileService:
         """
         log.info("%s - handle_moved - Input", self.__class__.__name__)
         try:
-            src_path: str = get_path_str(event.src_path)
-            dest_path: str = get_path_str(event.dest_path)
+            src_path: Path = get_path(event.src_path)
+            dest_path: Path = get_path(event.dest_path)
             log.info("%s - handle_moved - Paths - src: %s, dest: %s", self.__class__.__name__, src_path, dest_path)
 
             if self._is_temporary_file(dest_path):
@@ -63,7 +63,7 @@ class FileService:
             if event.is_directory:
                 return
 
-            src_path: str = get_path_str(event.src_path)
+            src_path: Path = get_path(event.src_path)
             if self._is_temporary_file(src_path):
                 log.warning(
                     "%s - handle_created - Output - Temporary file detected: %s",
@@ -96,8 +96,8 @@ class FileService:
                     except Exception as e:
                         log.error("Error moving %s: %s", file_path, e)
 
-    def _is_temporary_file(self, file_path: str) -> bool:
-        return any(file_path.endswith(ext) for ext in Constants.TEMPORARY_FILE_EXTENSIONS.value)
+    def _is_temporary_file(self, file_path: Path) -> bool:
+        return file_path.suffix in Constants.TEMPORARY_FILE_EXTENSIONS.value
 
     def _process_and_move_file(self, file_path: Path) -> bool:
         """
