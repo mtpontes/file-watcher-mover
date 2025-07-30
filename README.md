@@ -168,7 +168,7 @@ nssm remove <service_name>
 
 
 ### Resource allocation
-The process consumes only 1.5MB of RAM, CPU consumption is also irrelevant, while no event is triggered, the CPU remains at 0% usage, when an event is triggered it does not even reach 1% (Ryzen 7 5800X) usage, in addition to the processing occurring fast enough that you don't even notice it happened.
+The process consumes only 12.2MB of RAM, CPU consumption is also irrelevant, while no event is triggered, the CPU remains at 0% usage, when an event is triggered it does not even reach 1% (Ryzen 7 5800X) usage, in addition to the processing occurring fast enough that you don't even notice it happened.
 ![Windows Task Manager process print](./assets/process.png)
 
 > **NOTE**  
